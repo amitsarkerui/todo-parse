@@ -32,7 +32,7 @@
       >
       <div>
         <button
-          @click="$emit('handleDone', todo.id)"
+          @click="handleDone(todo?.id)"
           :class="[
             ' px-3 py-2 rounded-full cursor-pointer',
             todo.attributes.isCompleted
@@ -71,36 +71,36 @@ export default {
     },
   },
   methods: {
-    // handleDone(id) {
-    //   console.log(id);
-    //   const Todo = Parse.Object.extend("Todo");
-    //   const query = new Parse.Query(Todo);
-    //   query
-    //     .get(id)
-    //     .then((todo) => {
-    //       todo.set("isCompleted", !this.todo.attributes.isCompleted);
-    //       return todo.save();
-    //     })
-    //     .then((updatedTodo) => {
-    //       console.log("Marked as done:", updatedTodo);
-    //     })
-    //     .catch((err) => {
-    //       console.log(err);
-    //     });
-    // },
-    // deleteTodo(id) {
-    //   const Todo = Parse.Object.extend("Todo");
-    //   const query = new Parse.Query(Todo);
-    //   query
-    //     .get(id)
-    //     .then((todo) => {
-    //       return todo.destroy();
-    //     })
-    //     .then(() => {
-    //       console.log("Todo deleted successfully");
-    //     })
-    //     .catch((err) => console.log(err));
-    // },
+    handleDone(id) {
+      this.$store.dispatch("todoDone", id);
+
+      // const query = new Parse.Query(Todo);
+      // query
+      //   .get(id)
+      //   .then((todo) => {
+      //     todo.set("isCompleted", !this.todo.attributes.isCompleted);
+      //     return todo.save();
+      //   })
+      //   .then((updatedTodo) => {
+      //     console.log("Marked as done:", updatedTodo);
+      //   })
+      //   .catch((err) => {
+      //     console.log(err);
+      //   });
+    },
+    deleteTodo(id) {
+      const Todo = Parse.Object.extend("Todo");
+      const query = new Parse.Query(Todo);
+      query
+        .get(id)
+        .then((todo) => {
+          return todo.destroy();
+        })
+        .then(() => {
+          console.log("Todo deleted successfully");
+        })
+        .catch((err) => console.log(err));
+    },
   },
   computed: {
     dueDate() {

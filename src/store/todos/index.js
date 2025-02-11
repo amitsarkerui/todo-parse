@@ -1,5 +1,5 @@
 import Parse from "parse/dist/parse.min.js";
-let Todos = Parse.Object.extend("Todo");
+let Todo = Parse.Object.extend("Todo");
 
 const state = () => {
   todos: [];
@@ -10,6 +10,13 @@ const getters = {
 const mutations = {
   setTodos: (state, todos) => {
     state.todos = todos;
+  },
+  todoDone: (state, updatedTodo) => {
+    const index = state.todos.findIndex((todo) => todo.id === updatedTodo.id);
+    // console.log(index);
+    if (index !== -1) {
+      state.todos[index] = updatedTodo;
+    }
   },
 };
 const actions = {
@@ -28,6 +35,18 @@ const actions = {
       context.commit("setTodos", todos);
     } catch (err) {
       console.error("Error fetching todos:", err);
+    }
+  },
+  async todoDone(context, todoId) {
+    try {
+      const todosQuery = new Parse.Query("Todo");
+      const todo = await todosQuery.get(todoId);
+      todo.set("isCompleted", !todo.get("isCompleted"));
+      const updatedTodo = await todo.save();
+
+      context.commit("todoDone", updatedTodo);
+    } catch (error) {
+      console.error(error);
     }
   },
 };
