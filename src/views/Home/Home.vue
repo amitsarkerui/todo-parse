@@ -56,22 +56,10 @@ export default {
   },
   methods: {
     fetchTodos() {
-      // console.log("FT", this.currentUser);
-      let Todos = Parse.Object.extend("Todo");
-      let todoQuery = new Parse.Query(Todos);
-      // const relatedUser = new Parse.User();
-      // // console.log("REU", relatedUser);
-      // relatedUser.id = this.currentUser.id;
-      todoQuery
-        .equalTo("relatedUser", this.currentUser)
-        .find()
-        .then((res) => {
-          this.todos = res;
-        })
-        .catch((err) => {
-          console.error("Error fetching todos:", err);
-        });
+      console.log("Getters", this.$store.getters.allTodos);
+      this.todos = this.$store.getters.allTodos;
     },
+
     handleDone(id) {
       // console.log(id);
       const Todo = Parse.Object.extend("Todo");
@@ -118,19 +106,17 @@ export default {
           console.error("Error logging out:", err);
         });
     },
-    // handleAllTasks() {
-    //   console.log("handleAllTasks clicked");
-    // },
   },
   mounted() {
     const currentUser = Parse.User.current();
-    console.log("Current User", currentUser);
     if (currentUser) {
       this.currentUser = currentUser;
+      this.$store.dispatch("fetchAllTodos", currentUser.id).then(() => {
+        this.fetchTodos();
+      });
     } else {
       this.$router.push("/login");
     }
-    this.fetchTodos();
   },
 };
 </script>
