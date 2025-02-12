@@ -20,13 +20,7 @@
         </button>
       </div>
     </div>
-    <TodosCard
-      v-for="todo in todos"
-      :key="todo.id"
-      :todo="todo"
-      @handleDone="handleDone"
-      @deleteTodo="deleteTodo"
-    />
+    <TodosCard v-for="todo in todos" :key="todo.id" :todo="todo" />
   </div>
 </template>
 
@@ -58,42 +52,6 @@ export default {
     fetchTodos() {
       console.log("Getters", this.$store.getters.allTodos);
       this.todos = this.$store.getters.allTodos;
-    },
-
-    handleDone(id) {
-      // console.log(id);
-      const Todo = Parse.Object.extend("Todo");
-      const query = new Parse.Query(Todo);
-      query
-        .get(id)
-        .then((todo) => {
-          todo.set("isCompleted", true);
-          return todo.save();
-        })
-        .then((updatedTodo) => {
-          this.todos = this.todos.map((todo) =>
-            todo.id === id ? updatedTodo : todo
-          );
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-      // console.log(this.todos);
-    },
-    deleteTodo(id) {
-      const Todo = Parse.Object.extend("Todo");
-      const query = new Parse.Query(Todo);
-
-      query
-        .get(id)
-        .then((todo) => {
-          return todo.destroy();
-        })
-        .then(() => {
-          this.todos = this.todos.filter((todo) => todo.id !== id);
-          console.log("Todo deleted successfully");
-        })
-        .catch((err) => console.log(err));
     },
 
     handleLogout() {

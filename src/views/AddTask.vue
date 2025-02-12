@@ -11,7 +11,7 @@
           >
           <input
             type="text"
-            v-model="fromData.title"
+            v-model="formData.title"
             id="title"
             class="w-full block p-4 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-base focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           />
@@ -23,7 +23,7 @@
             >Description</label
           >
           <textarea
-            v-model="fromData.description"
+            v-model="formData.description"
             type="text"
             id="description"
             class="block w-full p-4 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-base focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
@@ -36,7 +36,7 @@
             >Due Date</label
           >
           <input
-            v-model="fromData.dueDate"
+            v-model="formData.dueDate"
             type="date"
             id="large-input"
             class="block w-full p-4 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-base focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
@@ -45,7 +45,7 @@
         <label class="inline-flex items-center mb-5 cursor-pointer">
           <input
             type="checkbox"
-            v-model="fromData.priority"
+            v-model="formData.priority"
             class="sr-only peer"
           />
           <div
@@ -70,7 +70,7 @@ export default {
   name: "AddTask",
   data() {
     return {
-      fromData: {
+      formData: {
         title: "",
         description: "",
         dueDate: "",
@@ -80,23 +80,11 @@ export default {
     };
   },
   methods: {
-    handleSubmit() {
-      const Todo = Parse.Object.extend("Todo");
-      const todo = new Todo();
-      const dataToSave = {
-        ...this.fromData,
-        dueDate: this.fromData.dueDate ? new Date(this.fromData.dueDate) : null,
-        priority: Boolean(this.fromData.priority),
-        relatedUser: this.currentUser,
-      };
-      todo.set(dataToSave);
-      todo
-        .save()
-        .then((res) => {
-          console.log(res);
-          this.$router.push("/");
-        })
-        .catch((err) => console.log(err));
+    async handleSubmit() {
+      await this.$store.dispatch("addTodo", {
+        todoData: this.formData,
+        router: this.$router,
+      });
     },
   },
   mounted() {

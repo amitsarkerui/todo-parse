@@ -49,7 +49,7 @@
           <i class="pi pi-pencil text-white"></i>
         </RouterLink>
         <button
-          @click="$emit('deleteTodo', todo.id)"
+          @click="deleteTodo(todo.id)"
           title="Delete Todo"
           class="ml-2 bg-red-500 px-3 py-2 rounded-full cursor-pointer"
         >
@@ -73,33 +73,9 @@ export default {
   methods: {
     handleDone(id) {
       this.$store.dispatch("todoDone", id);
-
-      // const query = new Parse.Query(Todo);
-      // query
-      //   .get(id)
-      //   .then((todo) => {
-      //     todo.set("isCompleted", !this.todo.attributes.isCompleted);
-      //     return todo.save();
-      //   })
-      //   .then((updatedTodo) => {
-      //     console.log("Marked as done:", updatedTodo);
-      //   })
-      //   .catch((err) => {
-      //     console.log(err);
-      //   });
     },
     deleteTodo(id) {
-      const Todo = Parse.Object.extend("Todo");
-      const query = new Parse.Query(Todo);
-      query
-        .get(id)
-        .then((todo) => {
-          return todo.destroy();
-        })
-        .then(() => {
-          console.log("Todo deleted successfully");
-        })
-        .catch((err) => console.log(err));
+      this.$store.dispatch("deleteTodo", id);
     },
   },
   computed: {

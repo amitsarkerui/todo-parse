@@ -1,9 +1,12 @@
 import Parse from "parse/dist/parse.min.js";
 let Todo = Parse.Object.extend("Todo");
-
-const state = () => {
-  todos: [];
+const getCurrentUser = () => {
+  return Parse.User.current();
 };
+
+const state = () => ({
+  todos: [],
+});
 const getters = {
   allTodos: (state) => state.todos,
 };
@@ -18,6 +21,18 @@ const mutations = {
       state.todos[index] = updatedTodo;
     }
   },
+  deleteTodo: (state, todoId) => {
+    const index = state.todos.findIndex((todo) => todo.id === todoId);
+    if (index !== -1) {
+      state.todos.splice(index, 1);
+      console.log("Deleting Todo ID:", todoId);
+    }
+  },
+  addTodo: (state, newTodo) => {
+    console.log("nt", newTodo);
+    console.log("st", state.todos);
+    state.todos.push(newTodo);
+  },
 };
 const actions = {
   async fetchAllTodos(context, userId) {
@@ -31,8 +46,7 @@ const actions = {
       });
 
       const todos = await todosQuery.find();
-      console.log("Fetch Todos", todos);
-      context.commit("setTodos", todos);
+      await context.commit("setTodos", todos);
     } catch (err) {
       console.error("Error fetching todos:", err);
     }
@@ -47,6 +61,34 @@ const actions = {
       context.commit("todoDone", updatedTodo);
     } catch (error) {
       console.error(error);
+    }
+  },
+  async deleteTodo(context, todoId) {
+    try {
+      const todosQuery = new Parse.Query("Todo");
+      const todo = await todosQuery.get(todoId);
+      await todo.destroy();
+      context.commit("deleteTodo", todoId);
+    } catch (error) {
+      console.error(error);
+    }
+  },
+  async addTodo(context, { todoData, router }) {
+    const todo = new Todo();
+    const currentUser = await getCurrentUser();
+    console.log(todoData, router);
+    const dataToSave = {
+      ...todoData,
+      dueDate: todoData.dueDate ? new Date(todoData.dueDate) : null,
+      priority: Boolean(todoData.priority),
+      relatedUser: currentUser,
+    };
+    todo.set(dataToSave);
+    const res = await todo.save();
+    // console.log(res);
+    if (res.id) {
+      await context.commit("addTodo", res);
+      router.push("/");
     }
   },
 };
