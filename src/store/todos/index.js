@@ -1,24 +1,28 @@
 import Parse from "parse/dist/parse.min.js";
 let Todo = Parse.Object.extend("Todo");
+const todosQuery = new Parse.Query("Todo");
 const getCurrentUser = () => {
   return Parse.User.current();
 };
 
 const state = () => ({
   todos: [],
+  currentTodo: {},
 });
 const getters = {
   allTodos: (state) => state.todos,
+  getCurrentTodo: (state) => state.currentTodo,
 };
 const mutations = {
   setTodos: (state, todos) => {
     state.todos = todos;
   },
-  todoDone: (state, updatedTodo) => {
+  UpdatedTodo: (state, updatedTodo) => {
     const index = state.todos.findIndex((todo) => todo.id === updatedTodo.id);
     // console.log(index);
     if (index !== -1) {
       state.todos[index] = updatedTodo;
+      console.log("ust", state.todos);
     }
   },
   deleteTodo: (state, todoId) => {
@@ -32,6 +36,10 @@ const mutations = {
     console.log("nt", newTodo);
     console.log("st", state.todos);
     state.todos.push(newTodo);
+  },
+  SetCurrentTodo: (state, todo) => {
+    state.currentTodo = todo;
+    console.log("Current Todo", state.currentTodo);
   },
 };
 const actions = {
@@ -58,7 +66,7 @@ const actions = {
       todo.set("isCompleted", !todo.get("isCompleted"));
       const updatedTodo = await todo.save();
 
-      context.commit("todoDone", updatedTodo);
+      context.commit("UpdatedTodo", updatedTodo);
     } catch (error) {
       console.error(error);
     }
@@ -74,21 +82,52 @@ const actions = {
     }
   },
   async addTodo(context, { todoData, router }) {
-    const todo = new Todo();
-    const currentUser = await getCurrentUser();
-    console.log(todoData, router);
-    const dataToSave = {
-      ...todoData,
-      dueDate: todoData.dueDate ? new Date(todoData.dueDate) : null,
-      priority: Boolean(todoData.priority),
-      relatedUser: currentUser,
-    };
-    todo.set(dataToSave);
-    const res = await todo.save();
-    // console.log(res);
-    if (res.id) {
-      await context.commit("addTodo", res);
+    try {
+      const todo = new Todo();
+      const currentUser = await getCurrentUser();
+      console.log(todoData, router);
+      const dataToSave = {
+        ...todoData,
+        dueDate: todoData.dueDate ? new Date(todoData.dueDate) : null,
+        priority: Boolean(todoData.priority),
+        relatedUser: currentUser,
+      };
+      todo.set(dataToSave);
+      const res = await todo.save();
+      if (res.id) {
+        await context.commit("addTodo", res);
+        router.push("/");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  },
+  async GET_TODO_BY_ID(context, todoId) {
+    try {
+      const todosQuery = new Parse.Query("Todo");
+      const res = await todosQuery.get(todoId);
+      context.commit("SetCurrentTodo", res);
+    } catch (error) {
+      console.error(error);
+    }
+  },
+  async EDIT_TODO(context, { todoId, todoData, router }) {
+    try {
+      const currentUser = await getCurrentUser();
+      const dataToSave = {
+        ...todoData,
+        dueDate: todoData.dueDate ? new Date(todoData.dueDate) : null,
+        priority: Boolean(todoData.priority),
+        relatedUser: currentUser,
+      };
+      const todo = await todosQuery.get(todoId);
+      todo.set(dataToSave);
+      const todoUpdated = await todo.save();
+      console.log(todoUpdated);
+      context.commit("UpdatedTodo", todoUpdated);
       router.push("/");
+    } catch (error) {
+      console.error(error);
     }
   },
 };

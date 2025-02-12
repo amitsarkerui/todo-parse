@@ -80,38 +80,25 @@ export default {
     };
   },
   methods: {
-    fetchCurrentTodo() {
-      const Todos = Parse.Object.extend("Todo");
-      const query = new Parse.Query(Todos);
-      query
-        .get(this.todoId)
-        .then((res) => {
-          this.fromData.title = res.get("title");
-          this.fromData.description = res.get("description");
-          const dueDate = res.get("dueDate");
-          this.fromData.dueDate = dueDate
-            ? new Date(dueDate).toISOString().split("T")[0]
-            : "";
-          this.fromData.priority = res.get("priority");
-        })
-        .catch((err) => console.log(err));
+    async fetchCurrentTodo() {
+      await this.$store.dispatch("GET_TODO_BY_ID", this.todoId);
+      const currentTodo = this.$store.getters.getCurrentTodo;
+      console.log("CT", currentTodo);
+
+      this.fromData.title = currentTodo?.attributes.title;
+      this.fromData.description = currentTodo?.attributes.description;
+      const dueDate = currentTodo?.attributes.dueDate;
+      this.fromData.dueDate = dueDate
+        ? new Date(dueDate).toISOString().split("T")[0]
+        : "";
+      this.fromData.priority = currentTodo?.attributes.priority;
     },
     handleSubmit() {
-      const Todos = Parse.Object.extend("Todo");
-      const query = new Parse.Query(Todos);
-      const dataToSave = {
-        ...this.fromData,
-        dueDate: this.fromData.dueDate ? new Date(this.fromData.dueDate) : null,
-        priority: Boolean(this.fromData.priority),
-      };
-      query
-        .get(this.todoId)
-        .then((todo) => {
-          todo.set(dataToSave);
-          todo.save();
-          this.$router.push("/");
-        })
-        .catch((err) => console.log(err));
+      this.$store.dispatch("EDIT_TODO", {
+        todoId: this.todoId,
+        todoData: this.fromData,
+        router: this.$router,
+      });
     },
   },
   mounted() {
