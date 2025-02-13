@@ -19,7 +19,7 @@
       <ul class="space-y-2 font-medium">
         <li>
           <button
-            @click="$emit('handleAllTask')"
+            @click="handleAllTask"
             class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
           >
             <i class="pi pi-server"></i>
@@ -28,6 +28,7 @@
         </li>
         <li>
           <button
+            @click="handlePending"
             class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
           >
             <i class="pi pi-spinner-dotted"></i>
@@ -36,6 +37,7 @@
         </li>
         <li>
           <button
+            @click="handleDone"
             class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
           >
             <i class="pi pi-check"></i>
@@ -50,5 +52,16 @@
 <script>
 export default {
   name: "LeftSideNav",
+  methods: {
+    handlePending() {
+      this.$store.dispatch("FILTER_TODO", false);
+    },
+    handleAllTask() {
+      this.$store.dispatch("fetchAllTodos");
+    },
+    handleDone() {
+      this.$store.dispatch("FILTER_TODO", true);
+    },
+  },
 };
 </script>

@@ -41,9 +41,14 @@ const mutations = {
     state.currentTodo = todo;
     console.log("Current Todo", state.currentTodo);
   },
+  setFilterTodo: (state, pendingTodo) => {
+    state.todos = pendingTodo;
+  },
 };
 const actions = {
-  async fetchAllTodos(context, userId) {
+  async fetchAllTodos(context) {
+    const currentUser = getCurrentUser();
+    const userId = currentUser.id;
     try {
       // console.log(userId);
       const todosQuery = new Parse.Query("Todo");
@@ -129,6 +134,18 @@ const actions = {
     } catch (error) {
       console.error(error);
     }
+  },
+  async FILTER_TODO(context, filterOptions) {
+    const currentUser = await getCurrentUser();
+    todosQuery.equalTo("relatedUser", {
+      __type: "Pointer",
+      className: "_User",
+      objectId: currentUser.id,
+    });
+    todosQuery.equalTo("isCompleted", filterOptions);
+    const pendingTodo = await todosQuery.find();
+    console.log(pendingTodo);
+    context.commit("setFilterTodo", pendingTodo);
   },
 };
 

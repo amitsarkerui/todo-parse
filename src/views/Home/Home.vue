@@ -35,11 +35,14 @@ export default {
   },
   data() {
     return {
-      todos: [],
+      // todos: [],
       currentUser: null,
     };
   },
   computed: {
+    todos() {
+      return this.$store.getters.allTodos;
+    },
     fullname() {
       return (
         this.currentUser?.attributes.firstName +
@@ -49,11 +52,6 @@ export default {
     },
   },
   methods: {
-    fetchTodos() {
-      console.log("Getters", this.$store.getters.allTodos);
-      this.todos = this.$store.getters.allTodos;
-    },
-
     handleLogout() {
       Parse.User.logOut()
         .then(() => {
@@ -69,9 +67,7 @@ export default {
     const currentUser = Parse.User.current();
     if (currentUser) {
       this.currentUser = currentUser;
-      this.$store.dispatch("fetchAllTodos", currentUser.id).then(() => {
-        this.fetchTodos();
-      });
+      this.$store.dispatch("fetchAllTodos", currentUser.id).then(() => {});
     } else {
       this.$router.push("/login");
     }
